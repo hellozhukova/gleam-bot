@@ -50,6 +50,14 @@ client.on('interactionCreate', async (interaction) => {
     });
   }
 
+  if (commandName === 'profile') {
+    const user = getUser(guildId, userId);
+    return interaction.reply({
+      content: `Coins: ${user.coins}\nXP: ${user.xp}\nStreak: ${user.streak}`,
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
   if (commandName === 'leaderboard') {
     const rows = db
       .prepare(
