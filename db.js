@@ -13,6 +13,8 @@ db.exec(`
   )
 `);
 
+const existing = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+
 function getUser(guildId, userId) {
   db.prepare('INSERT OR IGNORE INTO users (guild_id, user_id) VALUES (?, ?)')
     .run(guildId, userId);
