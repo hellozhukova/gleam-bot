@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, MessageFlags } = require('discord.js');
 const { db, getUser } = require('./db');
+const { openMinePanel } = require('./game');
+
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -57,6 +59,11 @@ client.on('interactionCreate', async (interaction) => {
       flags: MessageFlags.Ephemeral,
     });
   }
+
+  if (commandName === 'mine') {
+    return openMinePanel(interaction);
+  }
+
 
   if (commandName === 'leaderboard') {
     const rows = db
