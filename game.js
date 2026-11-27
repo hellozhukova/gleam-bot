@@ -13,11 +13,17 @@ function openMinePanel(interaction) {
         .setLabel('Sell shards')
         .setStyle(ButtonStyle.Success);
 
-    const row = new ActionRowBuilder().addComponents(mineButton, sellButton);
+    const upgradeButton = new ButtonBuilder()
+        .setCustomId('upgrade')
+        .setLabel('Upgrade pickaxe')
+        .setStyle(ButtonStyle.Secondary);
+
+    const row = new ActionRowBuilder().addComponents(mineButton, sellButton, upgradeButton);
     return interaction.reply({ content: 'Tap Mine to dig for shards!', components: [row], flags: MessageFlags.Ephemeral });
 
 }
 
+const UPGRADE_BASE_COST = 200;
 const SHARD_PRICE = 2;
 const MAX_ENERGY = 10;
 const REGEN_MS = 30 * 1000; // one energy every 30 sec
@@ -87,6 +93,27 @@ function sell(interaction) {
     return interaction.update({ content: `Sold ${user.shards} shards for ${earned} coins. Coins: ${updated.coins}.`});
 }
 
+function upgrade(interaction) {
+    const guildId = interaction.guild.id;
+    const userId = interaction.user.id;
+
+    const user = getUser(guildId, userId);
+
+    const cost = UPGRADE_BASE_COST * user.pickaxe;
+
+    if ( user.coins < cost) {
+        return interaction.update({ content: `You need ${cost} coins to upgrade (You have ${user.coins}).` });
+    }
+
+    db.prepare(
+        'UPDATE users SET coins = coins - ?, pickaxe = pickaxe + 1 WHERE guild_id = ? AND user_id = ?'
+    ).run(cost, guildId, userId);
+
+    const updated = getUser(guildId, userId);
+
+    return interaction.update({ content: `Pickaxe upgraded to level ${updated.pickaxe}! Coins left: ${updated.coins}` });
+}
+
 function handleButton(interaction) {
     if (interaction.customId === 'mine') {
         return mine(interaction);
@@ -94,6 +121,10 @@ function handleButton(interaction) {
 
     if (interaction.customId === 'sell') {
         return sell(interaction);
+    }
+
+    if (interaction.customId === 'upgrade') {
+        return upgrade(interaction);
     }
 }
 
