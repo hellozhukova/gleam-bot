@@ -3,15 +3,22 @@ const { db, getUser } = require('./db');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 
 function openMinePanel(interaction) {
-    const button = new ButtonBuilder()
+    const mineButton = new ButtonBuilder()
         .setCustomId('mine')
         .setLabel('Mine')
         .setStyle(ButtonStyle.Primary);
 
-    const row = new ActionRowBuilder().addComponents(button);
+    const sellButton = new ButtonBuilder()
+        .setCustomId('sell')
+        .setLabel('Sell shards')
+        .setStyle(ButtonStyle.Success);
+
+    const row = new ActionRowBuilder().addComponents(mineButton, sellButton);
     return interaction.reply({ content: 'Tap Mine to dig for shards!', components: [row], flags: MessageFlags.Ephemeral });
+
 }
 
+const SHARD_PRICE = 2;
 const MAX_ENERGY = 10;
 const REGEN_MS = 30 * 1000; // one energy every 30 sec
 
@@ -37,15 +44,13 @@ function refreshEnergy(guildId, userId) {
     return getUser(guildId, userId);
 }
 
-function handleButton(interaction) {
-    if (interaction.customId !== 'mine') return;
-
+function mine(interaction) {
     const guildId = interaction.guild.id;
     const userId = interaction.user.id;
 
     const user = refreshEnergy(guildId, userId);
     if (user.energy < 1) {
-        return interaction.update({content: 'Out of energy!'});
+        return interaction.update({ content: 'Out of energy!' });
     }
 
     const found = Math.floor(Math.random() * 3) + 1;
@@ -59,6 +64,37 @@ function handleButton(interaction) {
     return interaction.update({
         content: `You found ${found} shards. Total: ${updated.shards}. Energy: ${updated.energy}.`
     });
+}
+
+function sell(interaction) {
+    const guildId = interaction.guild.id;
+    const userId = interaction.user.id;
+
+    const user = getUser(guildId, userId);
+
+    if (user.shards === 0) {
+        return interaction.update({ content: 'You have no shards to sell.' });
+    }
+
+    const earned = user.shards * SHARD_PRICE;
+    
+    db.prepare(
+        'UPDATE users SET coins = coins + ?, shards = 0 WHERE guild_id = ? AND user_id = ?'
+    ).run(earned, guildId, userId);
+
+    const updated = getUser(guildId, userId);
+    
+    return interaction.update({ content: `Sold ${user.shards} shards for ${earned} coins. Coins: ${updated.coins}.`});
+}
+
+function handleButton(interaction) {
+    if (interaction.customId === 'mine') {
+        return mine(interaction);
+    }
+
+    if (interaction.customId === 'sell') {
+        return sell(interaction);
+    }
 }
 
 module.exports = { openMinePanel, handleButton };
