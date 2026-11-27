@@ -58,7 +58,7 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'profile') {
     const user = getUser(guildId, userId);
     return interaction.reply({
-      content: `Coins: ${user.coins}\nXP: ${user.xp}\nStreak: ${user.streak}`,
+      content: `Coins: ${user.coins}\nXP: ${user.xp}\nStreak: ${user.streak}\nShards: ${user.shards}\nPickaxe level: ${user.pickaxe}`,
       flags: MessageFlags.Ephemeral,
     });
   }
