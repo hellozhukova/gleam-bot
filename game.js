@@ -14,18 +14,24 @@ function openMinePanel(interaction) {
 
 function handleButton(interaction) {
     if (interaction.customId !== 'mine') return;
-    const found = Math.floor(Math.random() * 3) + 1;
 
     const guildId = interaction.guild.id;
     const userId = interaction.user.id;
-    getUser(guildId, userId);
-    db.prepare(
-        'UPDATE users SET shards = shards + ? WHERE guild_id = ? AND user_id = ?'
-    ).run(found, guildId, userId);
 
     const user = getUser(guildId, userId);
+    if (user.energy < 1) { content: 'Out of energy!' }
 
-    return interaction.update({ content: `You found ${found} shards. Total: ${user.shards}` });
+    const found = Math.floor(Math.random() * 3) + 1;
+
+    db.prepare(
+        'UPDATE users SET shards = shards + ?, energy = energy - 1 WHERE guild_id = ? AND user_id = ?'
+    ).run(found, guildId, userId);
+
+    const updated = getUser(guildId, userId);
+
+    return interaction.update({
+        content: `You found ${found} shards. Total: ${updated.shards}. Energy: ${updated.energy}.`
+    });
 }
 
 module.exports = { openMinePanel, handleButton };
