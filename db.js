@@ -15,6 +15,17 @@ db.exec(`
 
 const existing = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
 
+function addColumn(name, definition) {
+  if(!existing.includes(name)) {
+    db.exec(`ALTER TABLE users ADD COLUMN ${name} ${definition}`);
+  }
+}
+
+addColumn('shards', 'INTEGER NOT NULL DEFAULT 0');
+addColumn('energy', 'INTEGER NOT NULL DEFAULT 10');
+addColumn('energy_updated', 'INTEGER NOT NULL DEFAULT 0');
+addColumn('pickaxe', 'INTEGER NOT NULL DEFAULT 1');
+
 function getUser(guildId, userId) {
   db.prepare('INSERT OR IGNORE INTO users (guild_id, user_id) VALUES (?, ?)')
     .run(guildId, userId);
@@ -22,5 +33,5 @@ function getUser(guildId, userId) {
     .prepare('SELECT * FROM users WHERE guild_id = ? AND user_id = ?')
     .get(guildId, userId);
 }
-
+console.log(db.prepare('PRAGMA table_info(users)').all().map((c) => c.name));
 module.exports = { db, getUser };
