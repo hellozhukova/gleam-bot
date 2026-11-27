@@ -7,6 +7,7 @@ const commands = [
   new SlashCommandBuilder().setName('balance').setDescription('Show your coins'),
   new SlashCommandBuilder().setName('leaderboard').setDescription('Top 10 players'),
   new SlashCommandBuilder().setName('profile').setDescription('Show your stats'),
+  new SlashCommandBuilder().setName('mine').setDescription('Open the Gleam Mining panel'),
 ].map((c) => c.toJSON());
 
 const rest = new REST().setToken(process.env.TOKEN);

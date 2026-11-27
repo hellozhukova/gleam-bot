@@ -1,15 +1,29 @@
 # Gleam
 
 A Discord bot that keeps communities active with daily rewards,
-a leaderboard, and (coming soon) mini-games, seasons, and teams.
+a leaderboard and a mining mini-game. Seasons and teams are coming soon.
 
 ## Features
-- Daily rewards with streak bonus
+- Daily rewards with a streak bonus
+- Player profile with all your stats
 - Balance and server leaderboard
+- Gleam Mining mini-game (`/mine`):
+  - tap to mine shards
+  - energy that refills over time
+  - sell shards for coins
+  - upgrade your pickaxe to mine more
 - SQLite storage
 
+## Commands
+- `/ping` — check that the bot is online
+- `/daily` — claim your daily coins
+- `/balance` — show your coins
+- `/profile` — show your stats: coins, XP, streak, shards and pickaxe level
+- `/leaderboard` — top 10 players on the server
+- `/mine` — open the Gleam Mining panel
+
 ## Roadmap
-- [ ] Mini-game with coin rewards
+- [x] Mini-game with coin rewards
 - [ ] Shop for roles and badges
 - [ ] Monthly seasons
 - [ ] Guilds, duels and server goals

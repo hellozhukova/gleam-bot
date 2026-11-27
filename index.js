@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, MessageFlags } = require('discord.js');
 const { db, getUser } = require('./db');
+const { openMinePanel, handleButton } = require('./game');
+
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -9,6 +11,9 @@ client.once('clientReady', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.isButton()) {
+    return handleButton(interaction);
+  }
   if (!interaction.isChatInputCommand()) return;
 
   const { commandName, guildId } = interaction;
@@ -53,9 +58,13 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'profile') {
     const user = getUser(guildId, userId);
     return interaction.reply({
-      content: `Coins: ${user.coins}\nXP: ${user.xp}\nStreak: ${user.streak}`,
+      content: `Coins: ${user.coins}\nXP: ${user.xp}\nStreak: ${user.streak}\nShards: ${user.shards}\nPickaxe level: ${user.pickaxe}`,
       flags: MessageFlags.Ephemeral,
     });
+  }
+
+  if (commandName === 'mine') {
+    return openMinePanel(interaction);
   }
 
   if (commandName === 'leaderboard') {
