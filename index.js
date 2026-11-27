@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, MessageFlags } = require('discord.js');
 const { db, getUser } = require('./db');
-const { openMinePanel } = require('./game');
+const { openMinePanel, handleButton } = require('./game');
 
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -11,6 +11,9 @@ client.once('clientReady', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.isButton()) {
+    return handleButton(interaction);
+  }
   if (!interaction.isChatInputCommand()) return;
 
   const { commandName, guildId } = interaction;
@@ -63,7 +66,6 @@ client.on('interactionCreate', async (interaction) => {
   if (commandName === 'mine') {
     return openMinePanel(interaction);
   }
-
 
   if (commandName === 'leaderboard') {
     const rows = db
