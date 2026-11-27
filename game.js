@@ -59,7 +59,7 @@ function mine(interaction) {
         return interaction.update({ content: 'Out of energy!' });
     }
 
-    const found = Math.floor(Math.random() * 3) + 1;
+    const found = Math.floor(Math.random() * 3) + 1 + (user.pickaxe - 1);
 
     db.prepare(
         'UPDATE users SET shards = shards + ?, energy = energy - 1 WHERE guild_id = ? AND user_id = ?'
@@ -68,7 +68,7 @@ function mine(interaction) {
     const updated = getUser(guildId, userId);
 
     return interaction.update({
-        content: `You found ${found} shards. Total: ${updated.shards}. Energy: ${updated.energy}.`
+        content: `You found ${found} shards. Total: ${updated.shards}. Energy: ${updated.energy}. Pickaxe: ${user.pickaxe}`
     });
 }
 
