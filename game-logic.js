@@ -27,4 +27,21 @@ function refreshEnergy(guildId, userId) {
     return getUser(guildId, userId);
 }
 
-module.exports = { UPGRADE_BASE_COST, SHARD_PRICE, MAX_ENERGY, REGEN_MS, refreshEnergy };
+function mineShards(guildId, userId) {
+    const user = refreshEnergy(guildId, userId);
+    if (user.energy < 1) {
+        return { ok: false, reason: 'no_energy', user };
+    }
+
+    const found = Math.floor(Math.random() * 3) + 1 + (user.pickaxe - 1);
+
+    db.prepare(
+        'UPDATE users SET shards = shards + ?, energy = energy - 1 WHERE guild_id = ? AND user_id = ?'
+    ).run(found, guildId, userId);
+
+    const updated = getUser(guildId, userId);
+    
+    return { ok: true, found, user: updated };
+}
+
+module.exports = { UPGRADE_BASE_COST, SHARD_PRICE, MAX_ENERGY, REGEN_MS, refreshEnergy, mineShards };

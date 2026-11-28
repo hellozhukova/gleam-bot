@@ -1,5 +1,5 @@
 const { db, getUser } = require('./db');
-const { UPGRADE_BASE_COST, SHARD_PRICE, MAX_ENERGY, REGEN_MS, refreshEnergy } = require('./game-logic');
+const { UPGRADE_BASE_COST, SHARD_PRICE, refreshEnergy, mineShards } = require('./game-logic');
 
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 
@@ -28,21 +28,13 @@ function mine(interaction) {
     const guildId = interaction.guild.id;
     const userId = interaction.user.id;
 
-    const user = refreshEnergy(guildId, userId);
-    if (user.energy < 1) {
-        return interaction.update({ content: 'Out of energy!' });
+    const result = mineShards(guildId, userId);
+    if (!result.ok) {
+        return interaction.update({ content: 'Out of energy!'})
     }
 
-    const found = Math.floor(Math.random() * 3) + 1 + (user.pickaxe - 1);
-
-    db.prepare(
-        'UPDATE users SET shards = shards + ?, energy = energy - 1 WHERE guild_id = ? AND user_id = ?'
-    ).run(found, guildId, userId);
-
-    const updated = getUser(guildId, userId);
-
     return interaction.update({
-        content: `You found ${found} shards. Total: ${updated.shards}. Energy: ${updated.energy}. Pickaxe: ${user.pickaxe}`
+        content: `You found ${result.found} shards. Total: ${result.user.shards}. Energy: ${result.user.energy}. Pickaxe: ${result.user.pickaxe}`
     });
 }
 
